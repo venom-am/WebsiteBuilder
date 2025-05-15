@@ -10,21 +10,21 @@ type CustomerReviewsProps = {
 const CustomerReviews: React.FC<CustomerReviewsProps> = ({ colorScheme }) => {
   const reviews = [
     {
-      name: "Sarah Johnson",
+      name: "Samiksha",
       business: "Bloom Cafe",
       image: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
       content: "Websites transformed our cafe's online presence. The form-based process was incredibly easy, and the result looks professional!",
       rating: 5
     },
     {
-      name: "Michael Chen",
+      name: "Chirag Sharma",
       business: "Tech Solutions Pro",
       image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
       content: "As a tech consultant, I needed a website that reflected professionalism. Websites delivered exactly what I needed, quickly and efficiently.",
       rating: 5
     },
     {
-      name: "Emma Davis",
+      name: "Mahi Shah",
       business: "Fitness First Studio",
       image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg",
       content: "The website builder made it so easy to create our fitness studio's website. Our clients love the modern, clean design!",

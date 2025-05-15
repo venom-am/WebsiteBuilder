@@ -71,8 +71,9 @@ const WebsiteBuilder: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

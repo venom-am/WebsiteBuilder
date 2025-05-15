@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { WebsiteData, colorSchemes } from '../../types/website';
 import PreviewHeader from './PreviewHeader';
@@ -32,6 +32,7 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Array of arrays: one for each section
   const [sectionElements, setSectionElements] = useState<any[][]>(Array.from({ length: SECTION_COUNT }, () => []));
+  const [countdowns, setCountdowns] = useState<{ [key: string]: { target: number; remaining: string } }>({});
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -104,6 +105,48 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
     }
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdowns(prev => {
+        const newCountdowns = { ...prev };
+        Object.keys(newCountdowns).forEach(id => {
+          const target = newCountdowns[id].target;
+          const now = Date.now();
+          const diff = target - now;
+          if (diff <= 0) {
+            newCountdowns[id].remaining = 'Time is up!';
+          } else {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            newCountdowns[id].remaining = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+          }
+        });
+        return newCountdowns;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCountdownSave = (sectionIdx: number, element: any) => {
+    const targetDate = new Date(editingContent).getTime();
+    if (!isNaN(targetDate)) {
+      setCountdowns(prev => ({
+        ...prev,
+        [element.id]: { target: targetDate, remaining: '' }
+      }));
+      setSectionElements(prev => {
+        const newSections = prev.map(arr => arr.map(el => ({ ...el })));
+        newSections[sectionIdx] = newSections[sectionIdx].map(el =>
+          el.id === element.id ? { ...el, content: editingContent } : el
+        );
+        return newSections;
+      });
+    }
+    setEditingId(null);
+  };
+
   // Section components in order
   const sectionComponents = [
     <PreviewHeader companyName={companyDetails.name} colorScheme={colorScheme} key="header" />,
@@ -148,48 +191,43 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
       </div>
       
       <div className="overflow-auto max-h-[calc(100vh-220px)]">
-        <div className="grid grid-cols-12 gap-8" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="grid grid-cols-12 gap-4 md:gap-8" style={{ maxWidth: '100%', margin: '0 auto', padding: '0 1rem' }}>
           <div className="col-span-3 bg-white rounded-lg shadow-lg p-4 sticky top-8 h-fit">
             <h2 className="text-lg font-semibold mb-4">Elements</h2>
             <div className="space-y-2">
               <DraggableItem id="new-heading" type="heading">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   Heading
                 </div>
               </DraggableItem>
               <DraggableItem id="new-text" type="text">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   Text Block
                 </div>
               </DraggableItem>
               <DraggableItem id="new-image" type="image">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   Image
                 </div>
               </DraggableItem>
               <DraggableItem id="new-button" type="button">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   Button
                 </div>
               </DraggableItem>
               <DraggableItem id="new-spacer" type="spacer">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   Spacer
                 </div>
               </DraggableItem>
               <DraggableItem id="new-youtube" type="youtube">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   YouTube Embed
                 </div>
               </DraggableItem>
               <DraggableItem id="new-countdown" type="countdown">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                <div className={`p-3 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-100 hover:bg-${colorScheme}-200` : 'bg-gray-100 hover:bg-gray-200'}`}>
                   Countdown Timer
-                </div>
-              </DraggableItem>
-              <DraggableItem id="new-tooltip" type="tooltip">
-                <div className="p-3 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
-                  Tooltip
                 </div>
               </DraggableItem>
             </div>
@@ -206,7 +244,10 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
               {sectionComponents.map((SectionComponent, idx) => (
                 <React.Fragment key={idx}>
                   {SectionComponent}
-                  <DroppableZone onDrop={item => handleDrop(idx, item)}>
+                  <DroppableZone 
+                    onDrop={item => handleDrop(idx, item)}
+                    colorScheme={colorScheme}
+                  >
                     {sectionElements[idx].map((element) => (
                       <div key={element.id} className="relative group mb-4">
                         <ElementToolbar
@@ -241,7 +282,7 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
                               />
                             ) : (
                               <h2 
-                                className="text-2xl font-bold cursor-pointer" 
+                                className={`text-2xl font-bold cursor-pointer ${colorScheme ? `text-${colorScheme}-700` : 'text-gray-800'}`}
                                 onClick={() => handleEdit(element)}
                               >
                                 {element.content || 'Heading'}
@@ -260,7 +301,7 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
                               />
                             ) : (
                               <p 
-                                className="cursor-pointer" 
+                                className={`cursor-pointer ${colorScheme ? `text-${colorScheme}-600` : 'text-gray-600'}`}
                                 onClick={() => handleEdit(element)}
                               >
                                 {element.content || 'Text block'}
@@ -284,12 +325,80 @@ const WebsitePreview: React.FC<WebsitePreviewProps> = ({ websiteData, onPrev }) 
                             </div>
                           )}
                           {element.type === 'button' && (
-                            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                            <button className={`px-4 py-2 rounded transition-colors ${colorScheme ? `bg-${colorScheme}-500 hover:bg-${colorScheme}-600 text-white` : 'bg-blue-500 hover:bg-blue-600 text-white'}`}>
                               {element.content || 'Button'}
                             </button>
                           )}
                           {element.type === 'spacer' && (
                             <div className="h-8" />
+                          )}
+                          {element.type === 'youtube' && (
+                            editingId === element.id ? (
+                              <input
+                                type="text"
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                onBlur={() => handleSave(idx, element)}
+                                onKeyDown={(e) => handleKeyDown(e, idx, element)}
+                                className="w-full p-2 border rounded"
+                                placeholder="Paste YouTube URL here"
+                                autoFocus
+                              />
+                            ) : (
+                              <div className="w-full flex flex-col items-center">
+                                {element.content ? (
+                                  <iframe
+                                    width="100%"
+                                    height="315"
+                                    src={(() => {
+                                      const url = element.content;
+                                      if (url.includes('youtube.com/embed/')) return url;
+                                      const match = url.match(/(?:youtu.be\/|youtube.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+                                      return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+                                    })()}
+                                    title="YouTube video player"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  />
+                                ) : (
+                                  <div className="text-gray-500">No YouTube URL. <span className="underline cursor-pointer" onClick={() => handleEdit(element)}>Add URL</span></div>
+                                )}
+                                <button className="mt-2 text-blue-500 underline" onClick={() => handleEdit(element)}>
+                                  {element.content ? 'Edit URL' : 'Add URL'}
+                                </button>
+                              </div>
+                            )
+                          )}
+                          {element.type === 'countdown' && (
+                            editingId === element.id ? (
+                              <input
+                                type="datetime-local"
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                onBlur={() => handleCountdownSave(idx, element)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleCountdownSave(idx, element);
+                                  }
+                                }}
+                                className="w-full p-2 border rounded"
+                                autoFocus
+                              />
+                            ) : (
+                              <div className="w-full flex flex-col items-center">
+                                {countdowns[element.id] ? (
+                                  <div className="text-2xl font-bold">
+                                    {countdowns[element.id].remaining}
+                                  </div>
+                                ) : (
+                                  <div className="text-gray-500">No target date set. <span className="underline cursor-pointer" onClick={() => handleEdit(element)}>Set Date</span></div>
+                                )}
+                                <button className="mt-2 text-blue-500 underline" onClick={() => handleEdit(element)}>
+                                  {countdowns[element.id] ? 'Edit Date' : 'Set Date'}
+                                </button>
+                              </div>
+                            )
                           )}
                         </div>
                       </div>

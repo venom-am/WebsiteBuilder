@@ -4,7 +4,7 @@ import { ElementToolbarProps } from '../../types/builder';
 
 const ElementToolbar: React.FC<ElementToolbarProps> = ({
   element,
-  onUpdate,
+  // onUpdate,
   onDelete,
 }) => {
   return (
